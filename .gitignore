@@ -43,3 +43,12 @@ next-env.d.ts
 # crush
 .crush
 CRUSH.md
+
+# AI tool directories and files
+context/
+.claude/
+.windsurf/
+.windsurfrules
+.clinerules
+CLAUDE.md
+.github/copilot-instructions.md
