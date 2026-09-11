@@ -11,7 +11,8 @@ const transition = {
   stiffness: 100,
   restDelta: 0.001,
   restSpeed: 0.001,
-};
+} as const;
+
 
 export const MenuItem = ({
   setActive,
@@ -109,7 +110,10 @@ export const ProductItem = ({
   );
 };
 
-export const HoveredLink = ({ children, ...rest }: any) => {
+export const HoveredLink = ({
+  children,
+  ...rest
+}: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
   return (
     <a
       {...rest}
