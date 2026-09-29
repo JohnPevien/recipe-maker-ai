@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@ai-sdk/deepseek": "^1.0.14",
+    "@ai-sdk/react": "2.0.30",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-hover-card": "^1.1.15",
@@ -33,7 +34,8 @@
     "react-syntax-highlighter": "^15.6.6",
     "streamdown": "^1.1.10",
     "tailwind-merge": "^3.3.1",
-    "use-stick-to-bottom": "^1.1.1"
+    "use-stick-to-bottom": "^1.1.1",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

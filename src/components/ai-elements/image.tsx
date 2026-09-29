@@ -11,14 +11,19 @@ export const Image = ({
   uint8Array,
   mediaType,
   ...props
-}: ImageProps) => (
-  <img
-    {...props}
-    alt={props.alt}
-    className={cn(
-      'h-auto max-w-full overflow-hidden rounded-md',
-      props.className
-    )}
-    src={`data:${mediaType};base64,${base64}`}
-  />
-);
+}: ImageProps) => {
+  // Swallowed: base64-only rendering for now; uint8Array support lands with image-gen.
+  void uint8Array;
+  return (
+    // eslint-disable-next-line @next/next/no-img-element -- data-URI generated image with unknown dimensions; next/image needs fixed sizes
+    <img
+      {...props}
+      alt={props.alt}
+      className={cn(
+        'h-auto max-w-full overflow-hidden rounded-md',
+        props.className
+      )}
+      src={`data:${mediaType};base64,${base64}`}
+    />
+  );
+};

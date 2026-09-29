@@ -10,7 +10,10 @@ importers:
     dependencies:
       '@ai-sdk/deepseek':
         specifier: ^1.0.14
-        version: 1.0.14(zod@4.1.5)
+        version: 1.0.14(zod@4.6.5)
+      '@ai-sdk/react':
+        specifier: 2.0.30
+        version: 2.0.30(react@19.1.0)(zod@4.6.5)
       '@radix-ui/react-avatar':
         specifier: ^1.1.10
         version: 1.1.10(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -37,7 +40,7 @@ importers:
         version: 1.2.2(@types/react@19.1.10)(react@19.1.0)
       ai:
         specifier: ^5.0.30
-        version: 5.0.30(zod@4.1.5)
+        version: 5.0.30(zod@4.6.5)
       ai-elements:
         specifier: ^1.1.1
         version: 1.1.1
@@ -83,6 +86,9 @@ importers:
       use-stick-to-bottom:
         specifier: ^1.1.1
         version: 1.1.1(react@19.1.0)
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
     devDependencies:
       '@eslint/eslintrc':
         specifier: ^3
@@ -147,6 +153,16 @@ packages:
   '@ai-sdk/provider@2.0.0':
     resolution: {integrity: sha512-6o7Y2SeO9vFKB8lArHXehNuusnpddKPk7xqL7T2/b+OvXMRIXUO1rR4wcv1hAFUAT9avGZshty3Wlua/XA7TvA==}
     engines: {node: '>=18'}
+
+  '@ai-sdk/react@2.0.30':
+    resolution: {integrity: sha512-3DepYWZqR4RgowpVYllsIWDCiYl3lHWN1w4fp+uLIvyqlWnTZqa3PWdEWjHbxNt98Y9Vh0VpVQKyAN7t3+to1Q==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      react: ^18 || ^19 || ^19.0.0-rc
+      zod: ^3.25.76 || ^4
+    peerDependenciesMeta:
+      zod:
+        optional: true
 
   '@alloc/quick-lru@5.2.0':
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
@@ -3160,6 +3176,11 @@ packages:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
 
+  swr@2.5.1:
+    resolution: {integrity: sha512-BRw55e8r0B7SpDN20CAzoQAHl7y1yP7/Zt7oqUjMv0vSt2u2Xnkm88Ws+VypbV9BXHQVuSuyVq7zMjO16wSExw==}
+    peerDependencies:
+      react: ^16.11.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
   tailwind-merge@3.3.1:
     resolution: {integrity: sha512-gBXpgUm/3rp1lMZZrM/w7D8GKqshif0zAymAhbCyIt8KMe+0v9DQ7cdYLR4FHH/cKpdTXb+A/tKKU3eolfsI+g==}
 
@@ -3172,6 +3193,10 @@ packages:
 
   tar@7.4.3:
     resolution: {integrity: sha512-5S7Va8hKfV7W5U6g3aYxXmlPoZVAwUMy9AOKyF2fVuZa2UD3qZjg578OrLRt8PcNN1PleVaL/5/yYATNL0ICUw==}
+    engines: {node: '>=18'}
+
+  throttleit@2.1.0:
+    resolution: {integrity: sha512-nt6AMGKW1p/70DF/hGBdJB57B8Tspmbp5gfJ8ilhLnt7kkr2ye7hzD6NVG8GGErk2HWF34igrL2CXmNIkzKqKw==}
     engines: {node: '>=18'}
 
   tinyexec@1.0.1:
@@ -3305,6 +3330,11 @@ packages:
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
+  use-sync-external-store@1.7.0:
+    resolution: {integrity: sha512-6L+EeigHMQhdaIPNIFUKwfWJSwWFQ8gJbJ2DLOs5sDIegTwR9fRxvnM3uciHKjIZhFz+KAv2emhWMRvDmMcY8A==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
   uuid@11.1.0:
     resolution: {integrity: sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A==}
     hasBin: true
@@ -3378,43 +3408,53 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  zod@4.1.5:
-    resolution: {integrity: sha512-rcUUZqlLJgBC33IT3PNMgsCq6TzLQEG/Ei/KTCU0PedSWRMAXoOUN+4t/0H+Q8bdnLPdqUYnvboJT0bn/229qg==}
+  zod@4.6.5:
+    resolution: {integrity: sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q==}
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 
 snapshots:
 
-  '@ai-sdk/deepseek@1.0.14(zod@4.1.5)':
+  '@ai-sdk/deepseek@1.0.14(zod@4.6.5)':
     dependencies:
-      '@ai-sdk/openai-compatible': 1.0.14(zod@4.1.5)
+      '@ai-sdk/openai-compatible': 1.0.14(zod@4.6.5)
       '@ai-sdk/provider': 2.0.0
-      '@ai-sdk/provider-utils': 3.0.7(zod@4.1.5)
-      zod: 4.1.5
+      '@ai-sdk/provider-utils': 3.0.7(zod@4.6.5)
+      zod: 4.6.5
 
-  '@ai-sdk/gateway@1.0.15(zod@4.1.5)':
-    dependencies:
-      '@ai-sdk/provider': 2.0.0
-      '@ai-sdk/provider-utils': 3.0.7(zod@4.1.5)
-      zod: 4.1.5
-
-  '@ai-sdk/openai-compatible@1.0.14(zod@4.1.5)':
+  '@ai-sdk/gateway@1.0.15(zod@4.6.5)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
-      '@ai-sdk/provider-utils': 3.0.7(zod@4.1.5)
-      zod: 4.1.5
+      '@ai-sdk/provider-utils': 3.0.7(zod@4.6.5)
+      zod: 4.6.5
 
-  '@ai-sdk/provider-utils@3.0.7(zod@4.1.5)':
+  '@ai-sdk/openai-compatible@1.0.14(zod@4.6.5)':
+    dependencies:
+      '@ai-sdk/provider': 2.0.0
+      '@ai-sdk/provider-utils': 3.0.7(zod@4.6.5)
+      zod: 4.6.5
+
+  '@ai-sdk/provider-utils@3.0.7(zod@4.6.5)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
       '@standard-schema/spec': 1.0.0
       eventsource-parser: 3.0.6
-      zod: 4.1.5
+      zod: 4.6.5
 
   '@ai-sdk/provider@2.0.0':
     dependencies:
       json-schema: 0.4.0
+
+  '@ai-sdk/react@2.0.30(react@19.1.0)(zod@4.6.5)':
+    dependencies:
+      '@ai-sdk/provider-utils': 3.0.7(zod@4.6.5)
+      ai: 5.0.30(zod@4.6.5)
+      react: 19.1.0
+      swr: 2.5.1(react@19.1.0)
+      throttleit: 2.1.0
+    optionalDependencies:
+      zod: 4.6.5
 
   '@alloc/quick-lru@5.2.0': {}
 
@@ -4489,13 +4529,13 @@ snapshots:
 
   ai-elements@1.1.1: {}
 
-  ai@5.0.30(zod@4.1.5):
+  ai@5.0.30(zod@4.6.5):
     dependencies:
-      '@ai-sdk/gateway': 1.0.15(zod@4.1.5)
+      '@ai-sdk/gateway': 1.0.15(zod@4.6.5)
       '@ai-sdk/provider': 2.0.0
-      '@ai-sdk/provider-utils': 3.0.7(zod@4.1.5)
+      '@ai-sdk/provider-utils': 3.0.7(zod@4.6.5)
       '@opentelemetry/api': 1.9.0
-      zod: 4.1.5
+      zod: 4.6.5
 
   ajv@6.12.6:
     dependencies:
@@ -7003,6 +7043,12 @@ snapshots:
 
   supports-preserve-symlinks-flag@1.0.0: {}
 
+  swr@2.5.1(react@19.1.0):
+    dependencies:
+      dequal: 2.0.3
+      react: 19.1.0
+      use-sync-external-store: 1.7.0(react@19.1.0)
+
   tailwind-merge@3.3.1: {}
 
   tailwindcss@4.1.12: {}
@@ -7017,6 +7063,8 @@ snapshots:
       minizlib: 3.0.2
       mkdirp: 3.0.1
       yallist: 5.0.0
+
+  throttleit@2.1.0: {}
 
   tinyexec@1.0.1: {}
 
@@ -7194,6 +7242,10 @@ snapshots:
     dependencies:
       react: 19.1.0
 
+  use-sync-external-store@1.7.0(react@19.1.0):
+    dependencies:
+      react: 19.1.0
+
   uuid@11.1.0: {}
 
   vfile-location@5.0.3:
@@ -7283,6 +7335,6 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  zod@4.1.5: {}
+  zod@4.6.5: {}
 
   zwitch@2.0.4: {}

@@ -3,9 +3,10 @@ import { cn } from "@/lib/utils";
 import React from "react";
 import { motion, useAnimate } from "framer-motion";
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onDrag' | 'onDragStart' | 'onDragEnd' | 'onAnimationStart' | 'onAnimationEnd' | 'onClick'> {
   className?: string;
   children: React.ReactNode;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void | Promise<void>;
 }
 
 export const Button = ({ className, children, ...props }: ButtonProps) => {
@@ -71,15 +72,8 @@ export const Button = ({ className, children, ...props }: ButtonProps) => {
     await animateSuccess();
   };
 
-  const {
-    onClick,
-    onDrag,
-    onDragStart,
-    onDragEnd,
-    onAnimationStart,
-    onAnimationEnd,
-    ...buttonProps
-  } = props;
+  // Omit drops the DOM handlers that clash with framer-motion's signatures; onClick is re-attached via handleClick.
+  const { ...buttonProps } = props;
 
   return (
     <motion.button
