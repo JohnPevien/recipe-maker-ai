@@ -1,26 +1,18 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { deepseek } from '@ai-sdk/deepseek';
-import { streamText } from 'ai';
+import { convertToModelMessages, stepCountIs, streamText, tool, type UIMessage } from 'ai';
+import { convertMeasurement, convertMeasurementSchema } from '@/lib/convert-measurement';
 
 // Constants
 const DEFAULT_MODEL = 'deepseek-chat';
 const SUPPORTED_MODELS = ['deepseek-chat', 'deepseek-reasoner'] as const;
 const DEEPSEEK_API_KEY_ENV = 'DEEPSEEK_API_KEY';
+const MAX_STEPS = 4;
 
 // Types
-interface ChatMessage {
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-}
-
 interface ChatRequest {
-  messages: ChatMessage[];
+  messages: UIMessage[];
   model?: string;
-}
-
-interface StreamResponse {
-  type: 'reasoning' | 'text';
-  content: string;
 }
 
 // Validation functions
@@ -41,25 +33,26 @@ function validateRequest(body: unknown): ChatRequest {
     throw new Error('Messages array is required and cannot be empty');
   }
 
-  for (const message of messages) {
-    if (!message.role || !message.content) {
-      throw new Error('Each message must have role and content');
-    }
-    if (!['user', 'assistant', 'system'].includes(message.role)) {
-      throw new Error('Invalid message role');
-    }
-  }
-
   const selectedModel = model || DEFAULT_MODEL;
-  if (!SUPPORTED_MODELS.includes(selectedModel as typeof SUPPORTED_MODELS[number])) {
+  if (!SUPPORTED_MODELS.includes(selectedModel as (typeof SUPPORTED_MODELS)[number])) {
     throw new Error(`Unsupported model: ${selectedModel}`);
   }
 
   return { messages, model: selectedModel };
 }
 
+// Server-side tools the model can call.
+const kitchenTools = {
+  convertMeasurement: tool({
+    description:
+      'Convert a cooking measurement between units. Supports volume (ml, l, tsp, tbsp, fl oz, cup, pint, quart) and weight (g, kg, oz, lb). Cannot convert across the volume/weight families.',
+    inputSchema: convertMeasurementSchema,
+    execute: convertMeasurement,
+  }),
+};
+
 // Main handler
-export async function POST(request: NextRequest): Promise<Response> {
+export async function POST(request: Request): Promise<Response> {
   try {
     // Validate environment
     validateApiKey();
@@ -69,45 +62,16 @@ export async function POST(request: NextRequest): Promise<Response> {
     const { messages, model } = validateRequest(body);
 
     // Create streaming response
-    const result = await streamText({
+    const result = streamText({
       model: deepseek(model!),
-      messages,
+      system:
+        'You are a helpful cooking assistant. When a request involves unit conversions, call the convertMeasurement tool instead of doing arithmetic yourself.',
+      messages: convertToModelMessages(messages),
+      tools: kitchenTools,
+      stopWhen: stepCountIs(MAX_STEPS),
     });
 
-    // Create readable stream for response
-    const stream = new ReadableStream({
-      async start(controller) {
-        try {
-          for await (const part of result.fullStream) {
-            if (part.type === 'reasoning-delta') {
-              const response: StreamResponse = {
-                type: 'reasoning',
-                content: part.text,
-              };
-              controller.enqueue(`data: ${JSON.stringify(response)}\n\n`);
-            } else if (part.type === 'text-delta') {
-              const response: StreamResponse = {
-                type: 'text',
-                content: part.text,
-              };
-              controller.enqueue(`data: ${JSON.stringify(response)}\n\n`);
-            }
-          }
-          controller.enqueue('data: [DONE]\n\n');
-          controller.close();
-        } catch (error) {
-          controller.error(error);
-        }
-      },
-    });
-
-    return new Response(stream, {
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-      },
-    });
+    return result.toUIMessageStreamResponse({ sendReasoning: true });
 
   } catch (error) {
     console.error('Chat API error:', error);
