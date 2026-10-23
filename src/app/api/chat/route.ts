@@ -1,4 +1,10 @@
-import { NextResponse } from 'next/server';
+import {
+  assertMessagesSize,
+  checkApiKey,
+  checkRateLimit,
+  toErrorResponse,
+  ValidationError,
+} from '@/lib/api-guard';
 import { deepseek } from '@ai-sdk/deepseek';
 import { convertToModelMessages, stepCountIs, streamText, tool, type UIMessage } from 'ai';
 import { convertMeasurement, convertMeasurementSchema } from '@/lib/convert-measurement';
@@ -6,7 +12,6 @@ import { convertMeasurement, convertMeasurementSchema } from '@/lib/convert-meas
 // Constants
 const DEFAULT_MODEL = 'deepseek-chat';
 const SUPPORTED_MODELS = ['deepseek-chat', 'deepseek-reasoner'] as const;
-const DEEPSEEK_API_KEY_ENV = 'DEEPSEEK_API_KEY';
 const MAX_STEPS = 4;
 
 // Types
@@ -15,27 +20,23 @@ interface ChatRequest {
   model?: string;
 }
 
-// Validation functions
-function validateApiKey(): void {
-  if (!process.env[DEEPSEEK_API_KEY_ENV]) {
-    throw new Error(`Missing ${DEEPSEEK_API_KEY_ENV} environment variable`);
-  }
-}
 
 function validateRequest(body: unknown): ChatRequest {
   if (!body || typeof body !== 'object') {
-    throw new Error('Invalid request body');
+    throw new ValidationError('Invalid request body');
   }
 
   const { messages, model } = body as Partial<ChatRequest>;
 
   if (!Array.isArray(messages) || messages.length === 0) {
-    throw new Error('Messages array is required and cannot be empty');
+    throw new ValidationError('Messages array is required and cannot be empty');
   }
+
+  assertMessagesSize(messages);
 
   const selectedModel = model || DEFAULT_MODEL;
   if (!SUPPORTED_MODELS.includes(selectedModel as (typeof SUPPORTED_MODELS)[number])) {
-    throw new Error(`Unsupported model: ${selectedModel}`);
+    throw new ValidationError(`Unsupported model: ${selectedModel}`);
   }
 
   return { messages, model: selectedModel };
@@ -54,8 +55,11 @@ const kitchenTools = {
 // Main handler
 export async function POST(request: Request): Promise<Response> {
   try {
-    // Validate environment
-    validateApiKey();
+    const keyError = checkApiKey();
+    if (keyError) return keyError;
+
+    const rateLimited = checkRateLimit(request);
+    if (rateLimited) return rateLimited;
 
     // Parse and validate request
     const body = await request.json();
@@ -74,10 +78,6 @@ export async function POST(request: Request): Promise<Response> {
     return result.toUIMessageStreamResponse({ sendReasoning: true });
 
   } catch (error) {
-    console.error('Chat API error:', error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
-      { status: 400 }
-    );
+    return toErrorResponse(error, 'Chat API error:');
   }
 }

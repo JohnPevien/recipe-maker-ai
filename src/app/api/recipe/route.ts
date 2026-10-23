@@ -1,5 +1,11 @@
 import { deepseek } from '@ai-sdk/deepseek';
 import { streamObject } from 'ai';
+import {
+  assertPromptLength,
+  checkApiKey,
+  checkRateLimit,
+  toErrorResponse,
+} from '@/lib/api-guard';
 import { recipeSchema } from '@/lib/recipe-schema';
 
 const MODEL = 'deepseek-chat';
@@ -30,11 +36,18 @@ function readPrompt(raw: unknown): string {
 
 export async function POST(request: Request): Promise<Response> {
   try {
+    const keyError = checkApiKey();
+    if (keyError) return keyError;
+
+    const rateLimited = checkRateLimit(request);
+    if (rateLimited) return rateLimited;
+
     const prompt = readPrompt(await request.json()).trim();
 
     if (!prompt) {
       return Response.json({ error: 'Prompt is required' }, { status: 400 });
     }
+    assertPromptLength(prompt);
 
     const result = streamObject({
       model: deepseek(MODEL),
@@ -47,13 +60,10 @@ export async function POST(request: Request): Promise<Response> {
         console.error('Recipe stream error:', error);
       },
     });
-
     return result.toTextStreamResponse();
+
   } catch (error) {
-    console.error('Recipe API error:', error);
-    return Response.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
-      { status: 400 },
-    );
+    console.error('Recipe stream error:', error);
+    return toErrorResponse(error, 'Recipe API error:');
   }
 }
